@@ -45,6 +45,4 @@ jobs:
 
 workflow:
   jobs:
-    - build
-    - linting-testing:
-          requires: [build]
+    - linting-testing
