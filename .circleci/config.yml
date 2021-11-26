@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  build-lint:
     docker:
       - image: python:3.7.3-stretch
     steps:
@@ -16,34 +16,19 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             make install
+      - run:
+          name: linting
+          command: |
             make lint
       - save_cache:
           paths:
             - ./venv
           key: capstone
 
-  testing:
-    docker:
-      - image: python:3.7.3-stretch
-    steps:
-      - checkout
-      - restore_cache:
-          keys: [capstone]
-      - run:
-          name: run test
-          command: |
-            . venv/bin/activate
-            make install
-            make test 
-      - save_cache:
-          paths:
-            - ./venv
-          key: capstone
+
       
 
 workflows:
   default:
     jobs:
       - build
-      - testing:
-          requires: [build]
