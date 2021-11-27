@@ -27,7 +27,7 @@ jobs:
 
   create-infrastructure:
     docker:
-      - image: image: amazon/aws-cli
+      - image: amazon/aws-cli
     steps:
       - checkout
       - restore_cache:
