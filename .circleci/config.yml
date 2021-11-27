@@ -47,6 +47,33 @@ jobs:
         
             cat ~/project/.circleci/ansible/inventory.txt
 
+      - save_cache:
+          paths:
+            - ./venv
+          key: capstone
+
+  configure-new-server:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["	fd:93:54:44:8f:2e:1d:16:c5:a3:85:0d:ff:3c:6f:e1"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install ansible
+          command: |
+            apk add --update ansible
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+     # - destroy-environment:
+      #    when: on_fail
+      # Here's where you will add some code to rollback on failure
+
       
 
 workflows:
