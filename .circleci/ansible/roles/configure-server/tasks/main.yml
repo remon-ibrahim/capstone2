@@ -11,7 +11,8 @@
 
 
 - name: "settle a virtual environment"
+  become: yes
   shell: |
-    sudo apt install python3.8-venv -y 
+    apt install python3.8-venv -y 
     python3 -m venv ~/.capstone
     source ~/.capstone/bin/activate
