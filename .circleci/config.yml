@@ -54,6 +54,6 @@ jobs:
 workflows:
   default:
     jobs:
-      - build
+      - build-lint
       - create-infrastructure:
-          requires: [build]
+          requires: [build-lint]
