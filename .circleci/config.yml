@@ -43,9 +43,9 @@ jobs:
             aws ec2 describe-instances \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=capstone-green" \
-              --output text | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'>> ~/project/.circleci/ansible/inventory2.txt
+              --output text | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'>> ~/project/.circleci/ansible/inventory.txt
         
-            cat ~/project/.circleci/ansible/inventory2.txt
+            cat ~/project/.circleci/ansible/inventory.txt
 
       - save_cache:
           paths:
@@ -69,7 +69,7 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible
-            ansible-playbook -i inventory2.txt configure-server.yml
+            ansible-playbook -i inventory.txt configure-server.yml
      # - destroy-environment:
       #    when: on_fail
       # Here's where you will add some code to rollback on failure
