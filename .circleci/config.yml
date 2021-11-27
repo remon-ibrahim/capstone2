@@ -82,3 +82,5 @@ workflows:
       - build-lint
       - create-infrastructure:
           requires: [build-lint]
+      - configure-new-server:
+          requires: [create-infrastructure]
