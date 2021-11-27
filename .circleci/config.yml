@@ -27,19 +27,19 @@ jobs:
 
   create-infrastructure:
     docker:
-      - image: amazon/aws-cli 
+      - image: amazon/aws-cli
     steps:
       - checkout
-      - restore_cache:
-          keys: [capstone]
       - run: yum install -y tar gzip
       - run:
           name: creating infrastructure
           command: |
-          aws cloudformation deploy \
+            aws cloudformation deploy \
               --template-file .circleci/files/Instance_in_public.yml \
               --stack-name "capstone-green-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --tags project=capstone-green
+              --tags project=capstone-green 
+          #   exit 1
+
       - run:
           name: Add server ip to ansible inventory
           command: |
@@ -47,7 +47,7 @@ jobs:
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --filters "Name=tag:project,Values=capstone-green" \
               --output text | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'>> ~/project/.circleci/ansible/inventory.txt
-            cat ~/project/.circleci/ansible/inventory.txt 
+         # For troubleshooting   cat ~/project/.circleci/ansible/inventory.txt
 
       
 
