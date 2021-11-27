@@ -47,6 +47,11 @@ jobs:
         
             cat ~/project/.circleci/ansible/inventory.txt
 
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+
       - save_cache:
           paths:
             - ./venv
