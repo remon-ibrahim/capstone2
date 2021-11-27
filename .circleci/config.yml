@@ -9,7 +9,7 @@ jobs:
       - restore_cache:
           keys: [capstone]
       - run:
-          name: install dependencies
+          name: install and linting
           command: |
             pwd
             ls -l
