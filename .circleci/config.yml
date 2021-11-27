@@ -72,7 +72,7 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
      # - destroy-environment:
       #    when: on_fail
-      # Here's where you will add some code to rollback on failure
+      # Here's where you will add some code to rollback on failure 
 
       
 
