@@ -105,9 +105,7 @@ jobs:
 workflows:
   default:
     jobs:
-      - build-lint
-      - create-infrastructure:
-          requires: [build-lint]
+      - create-infrastructure
       - configure-new-server:
           requires: [create-infrastructure]
       - deploy-app:
