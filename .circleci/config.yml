@@ -105,13 +105,16 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Install aws
+          name: Install aws & ansible
           command: |
+            apk add --update ansible
             pip install awscli
       - run:
           name: Deploy app
           command: |
             cd .circleci/ansible
+            pwd
+            ls -l
             ansible-playbook -i inventory.txt deploy-app.yml
       - destroy-environment:
           when: on_fail
