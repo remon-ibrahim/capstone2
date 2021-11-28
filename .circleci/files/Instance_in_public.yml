@@ -86,10 +86,10 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.medium
-	  BlockDeviceMappings:
-      - DeviceName: "/dev/sdk"
-        Ebs:
-          VolumeSize: '10'  #increase diskspace for the k8s cluster
+      BlockDeviceMappings:
+        - DeviceName: "/dev/sdk"
+          Ebs:
+            VolumeSize: '10'  #increase diskspace for the k8s cluster
       ImageId: ami-083654bd07b5da81d
       NetworkInterfaces: 
         - AssociatePublicIpAddress: "true"
