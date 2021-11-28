@@ -1,41 +1,108 @@
-Description: >
-  capstone new server.
-
 Resources:
-  InstanceSecurityGroup:
+
+  VPC: 
+      Type: AWS::EC2::VPC
+      Properties:
+          CidrBlock: 10.0.0.0/16
+          EnableDnsHostnames: true
+
+  InternetGateway:
+      Type: AWS::EC2::InternetGateway
+      Properties:
+          Tags:
+              - Key: Name
+                Value: Internet GW 
+
+  InternetGatewayAttachment:
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+          InternetGatewayId: !Ref InternetGateway
+          VpcId: !Ref VPC
+
+  PublicSubnet1: 
+      Type: AWS::EC2::Subnet
+      Properties:
+          VpcId: !Ref VPC
+          AvailabilityZone: 'us-east-1a'
+          CidrBlock: 10.0.1.0/24
+          MapPublicIpOnLaunch: true
+          Tags: 
+              - Key: Name 
+                Value: Public Subnet (AZ1)
+
+  PublicRouteTable:
+      Type: AWS::EC2::RouteTable
+      Properties: 
+          VpcId: !Ref VPC
+          Tags: 
+              - Key: Name 
+                Value: !Sub Public Routes Table
+
+  PublicRoute1: 
+      Type: AWS::EC2::Route
+      DependsOn: InternetGatewayAttachment
+      Properties: 
+          RouteTableId: !Ref PublicRouteTable
+          DestinationCidrBlock: 0.0.0.0/0
+          GatewayId: !Ref InternetGateway  
+
+  PublicSubnet1RouteTableAssociation:
+      Type: AWS::EC2::SubnetRouteTableAssociation
+      Properties:
+          RouteTableId: !Ref PublicRouteTable
+          SubnetId: !Ref PublicSubnet1
+
+
+  WebServerSecGroup:
     Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupName: capstone
-      GroupDescription: Allow port 22 and port 3030.
-      SecurityGroupIngress:
+    Properties: 
+      GroupDescription: Allow http to our hosts and SSH from local only
+      SecurityGroupEgress: 
         - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 22
+          FromPort: 0
+          ToPort: 65535
           CidrIp: 0.0.0.0/0
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0 
         - IpProtocol: tcp
           FromPort: 8000
           ToPort: 8000
           CidrIp: 0.0.0.0/0
         - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
           CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
 
-
-  EC2Instance:
+# Server EC2 Instance
+  ServerInstance: 
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.medium
-      BlockDeviceMappings:
+	  BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
-          VolumeSize: '10'
-      SecurityGroups:
-        - Ref: InstanceSecurityGroup
-      KeyName: remon # If you use another key pair name, you should change this value to match.
-      # If this ami id is not available for you, you can find another (https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
-      # Ubuntu 18 or higher works fine
-      ImageId: ami-083654bd07b5da81d 
-      Tags:
-        - Key: Name
-          Value: capstone-green
+          VolumeSize: '10'  #increase diskspace for the k8s cluster
+      ImageId: ami-083654bd07b5da81d
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: "true"
+          DeviceIndex: "0"
+          GroupSet: 
+            - Ref: "WebServerSecGroup"
+          SubnetId: 
+            Ref: "PublicSubnet1"
+      KeyName: remon
+
+
+Outputs:
+  serverURL:
+      Value: !Join ["", ["http://", !GetAtt ServerInstance.PublicIp]]
+      Export:
+          Name: Application-new-URL
