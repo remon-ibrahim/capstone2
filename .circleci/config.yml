@@ -86,6 +86,7 @@ jobs:
           name: Install ansible
           command: |
             apk add --update ansible
+            pip install awscli
       - run:
           name: Configure server
           command: |
@@ -93,7 +94,6 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment:
           when: on_fail
-      # Here's where you will add some code to rollback on failure 
 
   deploy-app:
     docker:
@@ -105,9 +105,9 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Install ansible
+          name: Install aws
           command: |
-            apk add --update ansible
+            pip install awscli
       - run:
           name: Deploy app
           command: |
@@ -115,7 +115,6 @@ jobs:
             ansible-playbook -i inventory.txt deploy-app.yml
       - destroy-environment:
           when: on_fail
-      # Here's where you will add some code to rollback on failure 
       
 
 workflows:
