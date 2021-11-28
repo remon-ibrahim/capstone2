@@ -21,7 +21,7 @@
 - name: "install docker"
   become: yes
   shell: |
-    apt-get install docker-ce docker-ce-cli containerd.io -y
+    apt install docker-ce docker-ce-cli containerd.io -y
     chmod 666 /var/run/docker.sock
 
 - name: "install minicube & kubectl"
