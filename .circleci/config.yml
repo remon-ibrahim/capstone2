@@ -161,7 +161,8 @@ jobs:
           command: |
             export OldWorkflowID=$(aws cloudformation \ 
               list-stacks --query "StackSummaries[*].StackName" \
-              --stack-status-filter CREATE_COMPLETE --no-paginate --output text | cut -b 16-)
+              --stack-status-filter CREATE_COMPLETE --no-paginate  \
+              | grep -v "${CIRCLE_WORKFLOW_ID:0:7}" | grep [0-9] | sed 's/"//g' | cut -b 16-)
 
             echo OldWorkflowID: "${OldWorkflowID}"
             echo current_CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"    
@@ -173,7 +174,7 @@ jobs:
 
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
-              echo "................delete confirmed................."
+              echo "................delete old stack................."
               aws cloudformation delete-stack --stack-name capstone-green-${OldWorkflowID}
             fi
       - destroy-environment:
