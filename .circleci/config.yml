@@ -159,10 +159,9 @@ jobs:
       - run:
           name: Get old stack workflow id and Remove old stacks files
           command: |
-            export OldWorkflowID=$(aws cloudformation \ 
-              list-stacks --query "StackSummaries[*].StackName" \
+            export OldWorkflowID=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate  \
-              | grep -v "${CIRCLE_WORKFLOW_ID:0:7}" | grep [0-9] | sed 's/"//g' | cut -b 16-)
+              | grep -v "${CIRCLE_WORKFLOW_ID:0:7}" | grep [0-9] | sed 's/"//g' | sed 's/[a-z]//g' | sed 's/-//g')
 
             echo OldWorkflowID: "${OldWorkflowID}"
             echo current_CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"    
@@ -183,12 +182,6 @@ jobs:
 workflows:
   default:
     jobs:
-      - create-infrastructure
-      - configure-new-server:
-          requires: [create-infrastructure]
-      - deploy-app:
-          requires: [configure-new-server]
-      - smoke-test:
-          requires: [deploy-app]    
+      - create-infrastructure  
       - cleanup:
-          requires: [smoke-test]      
+          requires: [create-infrastructure]      
