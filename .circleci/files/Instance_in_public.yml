@@ -108,8 +108,3 @@ Resources:
           python3 -m venv ~/.capstone
           source ~/.capstone/bin/activate
 
-Outputs:
-  serverURL:
-      Value: !Join ["", ["http://", !GetAtt ServerInstance.PublicIp, ":8000"]]
-      Export:
-          Name: Application-new-URL
