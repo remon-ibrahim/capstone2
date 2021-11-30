@@ -119,6 +119,65 @@ jobs:
       - destroy-environment:
           when: on_fail
       
+  smoke-test:
+    docker:
+      - image: python:3.7-alpine3.11 
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update curl
+            pip install awscli
+      - run:
+          name: Get app url
+          command: |
+            export SERVER_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=capstone-green" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}')
+            export APP_URL="http://${SERVER_IP}:8000"
+            echo APP_URL=${APP_URL}
+      - run:
+          name: smoke test.
+          command: |
+            export SERVER_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=capstone-green" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}')
+            export APP_URL="http://${SERVER_IP}:8000"
+            if curl "${APP_URL}" | grep -i "Remon"
+            then
+                return 0
+            else
+                return 1
+            fi
+      - destroy-environment:
+          when: on_fail
+
+  cleanup:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Get old stack workflow id and Remove old stacks files
+          command: |
+            export OldWorkflowID=$(aws cloudformation \
+              list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+              --no-paginate --output text | cut -b 11-)
+
+            echo OldWorkflowID: "${OldWorkflowID}"
+            echo current_CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"    
+
+            export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
+              --stack-status-filter CREATE_COMPLETE --no-paginate --output text)) 
+
+            echo Stack names: "${STACKS[@]}"
+
+            if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
+            then
+              echo "................delete confirmed................."
+              aws cloudformation delete-stack --stack-name capstone-green-${OldWorkflowID}
+            fi
+      - destroy-environment:
+          when: on_fail
 
 workflows:
   default:
@@ -128,3 +187,7 @@ workflows:
           requires: [create-infrastructure]
       - deploy-app:
           requires: [configure-new-server]
+      - smoke-test:
+          requires: [deploy-app]    
+      - cleanup:
+          requires: [smoke-test]      
