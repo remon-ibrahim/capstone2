@@ -1,7 +1,7 @@
 version: 2.1
 
 commands:
-  destroy-environment:
+  destroy-infra:
     description: Destroy  cloudformation stacks given a workflow ID.
     parameters:
       when:
@@ -30,7 +30,6 @@ jobs:
             . venv/bin/activate
             make install
             make lint
-            python -m pytest -vv *.py
       - save_cache:
           paths:
             - ./venv
@@ -71,7 +70,7 @@ jobs:
             - ./venv
           key: capstone
 
-      - destroy-environment:
+      - destroy-infra:
           when: on_fail
 
   configure-new-server:
@@ -93,7 +92,7 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-      - destroy-environment:
+      - destroy-infra:
           when: on_fail
 
   deploy-app:
@@ -117,7 +116,7 @@ jobs:
             pwd
             ls -l
             ansible-playbook -i inventory.txt deploy-app.yml
-      - destroy-environment:
+      - destroy-infra:
           when: on_fail
       
   smoke-test:
@@ -149,7 +148,7 @@ jobs:
             else
                 return 1
             fi
-      - destroy-environment:
+      - destroy-infra:
           when: on_fail
 
   cleanup:
@@ -177,10 +176,20 @@ jobs:
               echo "................delete old stack................."
               aws cloudformation delete-stack --stack-name capstone-green-${OldWorkflowID}
             fi
-      - destroy-environment:
-          when: on_fail
+     # - destroy-infra:
+      #    when: on_fail
 
 workflows:
   default:
     jobs:
       - build-lint
+      - create-infrastructure:
+          requires: [build-lint]
+      - configure-new-server:
+          requires: [create-infrastructure]
+      - deploy-app:
+          requires: [configure-new-server]
+      - smoke-test:
+          requires: [deploy-app]
+      - cleanup:
+          requires: [smoke-test]
