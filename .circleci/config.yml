@@ -30,6 +30,7 @@ jobs:
             . venv/bin/activate
             make install
             make lint
+            python -m pytest app.py
       - save_cache:
           paths:
             - ./venv
@@ -157,7 +158,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Get old stack workflow id and Remove old stacks files
+          name: Get old stack workflow id and Remove old stacks infrastructure
           command: |
             export OldWorkflowID=$(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
               --stack-status-filter CREATE_COMPLETE --no-paginate  \
@@ -182,6 +183,4 @@ jobs:
 workflows:
   default:
     jobs:
-      - create-infrastructure  
-      - cleanup:
-          requires: [create-infrastructure]       
+      - build-lint
