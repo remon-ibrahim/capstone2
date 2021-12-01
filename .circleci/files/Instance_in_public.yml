@@ -99,9 +99,6 @@ Resources:
           SubnetId: 
             Ref: "PublicSubnet1"
       KeyName: remon
-      Tags: 
-        Key: "Name"
-        Value: "capstone-green-${CIRCLE_WORKFLOW_ID:0:7}"
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
