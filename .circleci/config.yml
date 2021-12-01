@@ -30,7 +30,7 @@ jobs:
             . venv/bin/activate
             make install
             make lint
-            python -m pytest app.py
+            python -m pytest -vv --cov=myrepolib tests/*.py
       - save_cache:
           paths:
             - ./venv
