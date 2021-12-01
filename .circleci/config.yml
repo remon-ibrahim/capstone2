@@ -191,4 +191,4 @@ workflows:
       - smoke-test:
           requires: [deploy-app]
       - cleanup:
-          requires: [smoke-test]
+          requires: [smoke-test] 
