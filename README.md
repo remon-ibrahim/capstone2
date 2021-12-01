@@ -4,4 +4,4 @@
 
 - About the Project
 
-A simple hello,world python app.  
+A simple hello,world python app.
