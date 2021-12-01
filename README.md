@@ -4,4 +4,4 @@
 
 - About the Project
 
-A simple hello,world python app.
+A simple hello,world python app. deployed in a docker container. with a ci/cd pipe line performing the blue-green deployment.
