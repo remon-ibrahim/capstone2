@@ -133,7 +133,7 @@ jobs:
       - run:
           name: Get app url
           command: |
-            export SERVER_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=capstone-green" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}')
+            export SERVER_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=capstone-green-${CIRCLE_WORKFLOW_ID:0:7}" | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}')
             export APP_URL="http://${SERVER_IP}:8000"
             echo APP_URL=${APP_URL}
       - run:
